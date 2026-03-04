@@ -9,6 +9,8 @@ import os
 from typing import Optional, List, Dict, Any, Union
 
 from .models import PromptModel
+from pathlib import Path
+from ..py.config import PromptManagerConfig
 
 # Import logging system
 try:
@@ -32,7 +34,7 @@ TAG_SUBQUERY = (
 class PromptDatabase:
     """Database operations class for managing prompts."""
 
-    def __init__(self, db_path: str = "prompts.db"):
+    def __init__(self, db_path=None):
         """
         Initialize the database operations.
 
@@ -40,7 +42,18 @@ class PromptDatabase:
             db_path: Path to the SQLite database file
         """
         self.logger = get_logger("prompt_manager.database")
-        self.logger.debug(f"Initializing database operations with path: {db_path}")
+
+        if db_path is None:
+            db_path = PromptManagerConfig.DEFAULT_DB_PATH
+
+        self.db_path = db_path
+
+        # ensure directory exists
+        db_file = Path(self.db_path)
+        if str(db_file.parent) not in ("", "."):
+            db_file.parent.mkdir(parents=True, exist_ok=True)
+           
+        self.logger.info(f"Initializing database operations with path: {db_path}")
         self.model = PromptModel(db_path)
         self.logger.debug("Database operations initialized successfully")
 
