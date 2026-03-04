@@ -123,13 +123,13 @@ class PromptModel:
         self._migrate_add_unique_constraint(conn)
 
         # Check if we need to migrate from old schema with workflow_name
-        #self._migrate_workflow_name_removal(conn)
+        self._migrate_workflow_name_removal(conn)
 
         # Fix foreign key data type mismatch
-        #self._migrate_foreign_key_types(conn)
+        self._migrate_foreign_key_types(conn)
 
         # Migrate JSON tags to normalized junction tables
-        #self._migrate_json_tags_to_junction(conn)
+        self._migrate_json_tags_to_junction(conn)
 
     def _create_indexes(self, conn: sqlite3.Connection) -> None:
         """
@@ -175,6 +175,8 @@ class PromptModel:
         with self._conn_lock:
             if self._conn is None:
                 self._conn = sqlite3.connect(self.db_path, check_same_thread=False)
+                conn.set_trace_callback(print)
+                
                 self._conn.row_factory = sqlite3.Row
                 self._conn.execute("PRAGMA journal_mode = WAL")
                 self._conn.execute("PRAGMA foreign_keys = ON")
